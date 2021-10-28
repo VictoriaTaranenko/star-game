@@ -14,54 +14,59 @@ public class Background {
         private float scale;
 
         public Star() {
-            this.position = new Vector2(MathUtils.random(0, ScreenManager.SCREEN_WIDTH), MathUtils.random(-200, ScreenManager.SCREEN_HEIGHT + 200));
-            this.velocity = new Vector2(MathUtils.random(-40, -5), 0);
-            this.scale = Math.abs(velocity.x) / 40.0f * 0.7f;
+            this.position = new Vector2(MathUtils.random(-200, ScreenManager.SCREEN_WIDTH + 200), MathUtils.random(-200, ScreenManager.SCREEN_HEIGHT + 200));
+            this.velocity = new Vector2(MathUtils.random(-15, -1), 0);
+            this.scale = Math.abs(velocity.x) / 15.0f * 0.7f;
         }
 
-        public void update(float dt) {
-            position.x += (velocity.x - game.getHero().getLastDisplacement().x * 15) * dt;
-            position.y += (velocity.y - game.getHero().getLastDisplacement().y * 15) * dt;
-            if(position.x < -20) {
-                position.x = ScreenManager.SCREEN_WIDTH + 20;
-                position.y = MathUtils.random(-200,ScreenManager.SCREEN_HEIGHT + 200);
-                scale = Math.abs(velocity.x) / 40.0f * 0.7f;
+
+            public void update(float dt) {
+                position.x += (velocity.x - game.getHero().getLastDisplacement().x * 15) * dt;
+                position.y += (velocity.y - game.getHero().getLastDisplacement().y * 15) * dt;
+                if (position.x < -200) {
+                    position.x = ScreenManager.SCREEN_WIDTH + 20;
+                    position.y = MathUtils.random(-200, ScreenManager.SCREEN_HEIGHT + 200);
+                    velocity.x = MathUtils.random(-15, -1);
+                    scale = Math.abs(velocity.x) / 15.0f * 0.7f;
+                }
+            }
+
+        }
+
+        private final int STARS_COUNT = 600;
+        private StarGame game;
+        private Texture textureCosmos;
+        private Texture textureStar;
+        private Star[] stars;
+
+        public  Background(StarGame game) {
+            this.game = game;
+            this.textureCosmos = new Texture("kosmos.png");
+            this.textureStar = new Texture("star.png");
+            this.stars = new Star[STARS_COUNT];
+            for (int i = 0; i < stars.length; i++) {
+                stars[i] = new Star();
+
+            }
+
+        }
+
+        // рисовать задний фон
+        public void render(SpriteBatch batch) {
+            batch.draw(textureCosmos, 0, 0);
+            for (int i = 0; i < stars.length; i++) {
+                batch.draw(textureStar, stars[i].position.x - 8, stars[i].position.y - 8, 8, 8, 16, 16, stars[i].scale, stars[i].scale, 0, 0, 0, 16, 16, false, false);
+                if (MathUtils.random(0, 500) < 2) {
+                    batch.draw(textureStar, stars[i].position.x - 8, stars[i].position.y - 8, 8, 8, 16, 16, stars[i].scale * 2, stars[i].scale * 2, 0, 0, 0, 16, 16, false, false);
+                }
             }
         }
 
-    }
-
-    private final int STARS_COUNT = 600;
-    private StarGame game;
-    private Texture textureCosmos;
-    private Texture textureStar;
-    private Star[] stars;
-
-    public Background(StarGame game) {
-        this.game = game;
-        this.textureCosmos = new Texture("kosmos.png");
-        this.textureStar = new Texture("star.png");
-        this.stars = new Star[STARS_COUNT];
-        for (int i = 0; i < stars.length; i++) {
-            stars[i] = new Star();
+        // пересчитывать задний фон
+        public void update(float dt) {
+            for (int i = 0; i < stars.length; i++) {
+                stars[i].update(dt);
+            }
         }
     }
 
-    // рисовать задний фон
-    public void render(SpriteBatch batch) {
-        batch.draw(textureCosmos, 0, 0);
-        for (int i = 0; i < stars.length; i++) {
-            batch.draw(textureStar, stars[i].position.x -8, stars[i].position.y -8,8,8,16,16,stars[i].scale,stars[i].scale,0,0,0,16,16,false,false);
-        if(MathUtils.random(0,500) < 2) {
-            batch.draw(textureStar, stars[i].position.x -8, stars[i].position.y -8,8,8,16,16,stars[i].scale * 2,stars[i].scale * 2,0,0,0,16,16,false,false);
-        }
-        }
-    }
-
-    // пересчитывать задний фон
-    public void update(float dt) {
-        for (int i = 0; i < stars.length; i++) {
-            stars[i].update(dt);
-        }
-    }
-}

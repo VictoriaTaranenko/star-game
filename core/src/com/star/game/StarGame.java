@@ -11,17 +11,22 @@ public class StarGame extends ApplicationAdapter {
 	private SpriteBatch batch;// фон игры, область отрисовки
 	private Background background;
 	private Hero hero;
+	private Asteroid asteroid;
 
 	public Hero getHero() {
 		return hero;
 	}
 
+	public Asteroid getAsteroid() {
+		return asteroid;
+	}
 
 	@Override// когда приложение запускается срабатывает этот метод, инициализация
 	public void create() {
 		batch = new SpriteBatch();
 		background = new Background(this);
 		hero = new Hero();
+		asteroid = new Asteroid();
 
 	}
 
@@ -34,12 +39,14 @@ public class StarGame extends ApplicationAdapter {
 		batch.begin();// хотим начаь рисовать
 		background.render(batch);
 		hero.render(batch);
+		asteroid.render(batch);
 		batch.end();// хотим закончить рисовать
 	}
 
 	public void update(float dt) {
 		background.update(dt);
 		hero.update(dt);
+		asteroid.update(dt);
 	}
 
 	@Override// когда приложение закрывается, освобождаем batch  и текстуру
