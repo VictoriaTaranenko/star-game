@@ -1,10 +1,12 @@
-package com.star.game;
+package com.star.app.game;
 // задний фон
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.star.app.StarGame;
+import com.star.app.screen.ScreenManager;
 
 public class Background {
 
@@ -21,8 +23,8 @@ public class Background {
 
 
             public void update(float dt) {
-                position.x += (velocity.x - game.getHero().getLastDisplacement().x * 15) * dt;
-                position.y += (velocity.y - game.getHero().getLastDisplacement().y * 15) * dt;
+                position.x += (velocity.x - gc.getHero().getVelocity().x / 10.0f) * dt;
+                position.y += (velocity.y - gc.getHero().getVelocity().y / 10.0f) * dt;
                 if (position.x < -200) {
                     position.x = ScreenManager.SCREEN_WIDTH + 20;
                     position.y = MathUtils.random(-200, ScreenManager.SCREEN_HEIGHT + 200);
@@ -34,13 +36,13 @@ public class Background {
         }
 
         private final int STARS_COUNT = 600;
-        private StarGame game;
+        private GameController gc;
         private Texture textureCosmos;
         private Texture textureStar;
         private Star[] stars;
 
-        public  Background(StarGame game) {
-            this.game = game;
+        public  Background(GameController gc) {
+            this.gc = gc;
             this.textureCosmos = new Texture("kosmos.png");
             this.textureStar = new Texture("star.png");
             this.stars = new Star[STARS_COUNT];

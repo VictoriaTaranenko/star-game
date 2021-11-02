@@ -1,9 +1,10 @@
-package com.star.game;
+package com.star.app.game;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.star.app.screen.ScreenManager;
 
 public class Asteroid {
    private Texture texture;
@@ -13,8 +14,8 @@ public class Asteroid {
 
    public Asteroid () {
        this.texture = new Texture("asteroid.png");
-       this.position = new Vector2(MathUtils.random(0,ScreenManager.SCREEN_HEIGHT),MathUtils.random(0,ScreenManager.SCREEN_WIDTH));
-        this.velocity = new Vector2(MathUtils.random(-40,-5),0);
+       this.position = new Vector2(MathUtils.random(0, ScreenManager.SCREEN_HEIGHT),MathUtils.random(0,ScreenManager.SCREEN_WIDTH));
+        this.velocity = new Vector2(MathUtils.random(-25,-5),0);
    }
 
    public void render (SpriteBatch batch) {
