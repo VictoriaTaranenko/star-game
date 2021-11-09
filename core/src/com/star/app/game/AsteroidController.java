@@ -7,14 +7,15 @@ import com.star.app.screen.utils.Assets;
 
 public class AsteroidController extends ObjectPool<Asteroid> {
 
+    private GameController gc;
 
     @Override
     protected Asteroid newObject() {
-        return new Asteroid();
+        return new Asteroid(gc);
     }
 
-    public AsteroidController() {
-
+    public AsteroidController(GameController gc) {
+    this.gc = gc;
     }
 
     public void render(SpriteBatch batch) {
@@ -24,8 +25,8 @@ public class AsteroidController extends ObjectPool<Asteroid> {
         }
     }
 
-    public void setup(float x, float y, float vx, float vy) {
-        getActiveElement().activate(x, y, vx, vy);
+    public void setup(float x, float y, float vx, float vy, float scale) {
+        getActiveElement().activate(x, y, vx, vy, scale);
     }
 
     public void update(float dt) {

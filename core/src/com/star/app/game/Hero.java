@@ -44,7 +44,7 @@ public class Hero {
     public void update(float dt) {
         fireTimer += dt;
         if(Gdx.input.isKeyPressed(Input.Keys.P)) {
-            if(fireTimer > 0.1f) {
+            if(fireTimer > 0.4f) {
                 fireTimer = 0.0f;
                 float wx = position.x + (float)Math.cos(Math.toRadians(angle)) * 25;
                 float wy = position.y + (float)Math.sin(Math.toRadians(angle)) * 25;

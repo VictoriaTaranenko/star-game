@@ -12,6 +12,7 @@ import com.star.app.screen.utils.Assets;
 
 public class Asteroid implements Poolable {
 
+    private GameController gc;
     private TextureRegion texture;
     private Vector2 position;
     private Vector2 velocity;
@@ -43,7 +44,8 @@ public class Asteroid implements Poolable {
         active = false;
     }
 
-   public Asteroid () {
+   public Asteroid (GameController gc) {
+        this.gc = gc;
       this.position = new Vector2(0,0);
       this.velocity = new Vector2(0,0);
       this.hitArea = new Circle(0,0,0);
@@ -55,22 +57,28 @@ public class Asteroid implements Poolable {
     hp -= amount;
     if(hp <= 0) {
         deactivate();
+        if(scale > 0.25f) {
+        gc.getAsteroidController().setup(position.x, position.y, MathUtils.random(-150.0f, 150.0f),MathUtils.random(-150.0f, 150.0f), scale -0.2f);
+        gc.getAsteroidController().setup(position.x, position.y, MathUtils.random(-150.0f, 150.0f),MathUtils.random(-150.0f, 150.0f), scale -0.2f);
+        gc.getAsteroidController().setup(position.x, position.y, MathUtils.random(-150.0f, 150.0f),MathUtils.random(-150.0f, 150.0f), scale -0.2f);
+
+        }
         return true;
     }
     return false;
    }
 
-   public void activate(float x, float y, float vx, float vy) {
-        position.set(x, y);
-        velocity.set(vx, vy);
-        hpMax = 10;
-        hp = hpMax;
-        angle = MathUtils.random(0.0f,360.0f);
-        hitArea.setPosition(position);
-        rotationSpeed = MathUtils.random(-60.0f, 60.0f);
-        active = true;
-        scale = 1.0f;
-       hitArea.setRadius(BASE_RADIUS * scale * 0.9f);
+   public void activate(float x, float y, float vx, float vy, float scale) {
+        this.position.set(x, y);
+        this.velocity.set(vx, vy);
+        this.hpMax = (int)(10 * scale);
+        this.hp = this.hpMax;
+        this.angle = MathUtils.random(0.0f,360.0f);
+        this.hitArea.setPosition(position);
+        this.rotationSpeed = MathUtils.random(-60.0f, 60.0f);
+        this.active = true;
+        this.scale = scale;
+       this.hitArea.setRadius(BASE_RADIUS * scale * 0.9f);
 
    }
 
