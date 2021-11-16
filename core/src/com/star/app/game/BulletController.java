@@ -7,22 +7,23 @@ import com.star.app.game.helpers.ObjectPool;
 import com.star.app.screen.utils.Assets;
 
 public class BulletController extends ObjectPool<Bullet> {
-
+    private GameController gc;
     private TextureRegion bulletTexture;
 
     @Override
     protected Bullet newObject() {
-        return new Bullet();
+        return new Bullet(gc);
     }
 
-    public BulletController() {
+    public BulletController(GameController gc) {
+        this.gc = gc;
         this.bulletTexture = Assets.getInstance().getAtlas().findRegion("pull");
     }
 
     public void render(SpriteBatch batch) {
         for(int i = 0; i < activeList.size(); i++) {
             Bullet b = activeList.get(i);
-            batch.draw(bulletTexture, b.getPosition().x - 8, b.getPosition().y - 8,8,8,16,16,1,1,b.getAngle());
+            batch.draw(bulletTexture, b.getPosition().x - 8, b.getPosition().y - 8,8,8,16,16,1.0f,1.0f,b.getAngle());
         }
     }
 

@@ -27,12 +27,20 @@ public class Asteroid implements Poolable {
     private final float BASE_SIZE = 256.0f;
     private final float BASE_RADIUS = BASE_SIZE / 2.0f;
 
+    public int getHpMax() {
+        return hpMax;
+    }
+
     public Vector2 getPosition() {
         return position;
     }
 
     public Circle getHitArea() {
         return hitArea;
+    }
+
+    public Vector2 getVelocity() {
+        return velocity;
     }
 
     @Override
@@ -57,7 +65,10 @@ public class Asteroid implements Poolable {
     hp -= amount;
     if(hp <= 0) {
         deactivate();
-        if(scale > 0.25f) {
+        if(scale > 0.9f) {
+            gc.getAsteroidController().setup(position.x, position.y, MathUtils.random(-150.0f, 150.0f),MathUtils.random(-150.0f, 150.0f), scale -0.2f);
+            gc.getAsteroidController().setup(position.x, position.y, MathUtils.random(-150.0f, 150.0f),MathUtils.random(-150.0f, 150.0f), scale -0.2f);
+        } else if(scale > 0.25f) {
         gc.getAsteroidController().setup(position.x, position.y, MathUtils.random(-150.0f, 150.0f),MathUtils.random(-150.0f, 150.0f), scale -0.2f);
         gc.getAsteroidController().setup(position.x, position.y, MathUtils.random(-150.0f, 150.0f),MathUtils.random(-150.0f, 150.0f), scale -0.2f);
         gc.getAsteroidController().setup(position.x, position.y, MathUtils.random(-150.0f, 150.0f),MathUtils.random(-150.0f, 150.0f), scale -0.2f);
