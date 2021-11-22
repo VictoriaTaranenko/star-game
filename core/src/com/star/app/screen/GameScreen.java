@@ -10,10 +10,10 @@ public class GameScreen extends AbstractScreen {
 
     private GameController gameController;// содержит всю логику игры, и все данные нашей игры
     private WorldRenderer worldRenderer;// модуль отрисовщика
-    private SpriteBatch batch;
+
 
     public GameScreen(SpriteBatch batch) {
-        this.batch = batch;
+        super(batch);
     }
 
     @Override
@@ -28,6 +28,11 @@ public class GameScreen extends AbstractScreen {
     public void render(float delta) {
         gameController.update(delta);
         worldRenderer.render();
+    }
+
+    @Override
+    public void dispose() {
+    gameController.dispose();
     }
 
 }

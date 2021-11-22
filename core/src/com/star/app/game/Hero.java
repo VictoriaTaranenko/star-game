@@ -12,11 +12,13 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.StringBuilder;
 import com.star.app.screen.ScreenManager;
 import com.star.app.screen.utils.Assets;
+import com.star.app.screen.utils.OptionsUtils;
 
 public class Hero {
 
     private GameController gc;
     private TextureRegion texture;
+    private KeysControl keysControl;
     private Vector2 position;
     private Vector2 velocity;
     private int hp;
@@ -27,6 +29,7 @@ public class Hero {
     private int scoreView;
     private Circle hitArea;
     private Weapon currentWeapon;
+    private int money;
 
     private StringBuilder strBuilder;
 
@@ -54,7 +57,7 @@ public class Hero {
         return hitArea;
     }
 
-    public Hero(GameController gc) {
+    public Hero(GameController gc, String keysControlPrefix) {
         this.gc = gc;
         this.texture = Assets.getInstance().getAtlas().findRegion("ship");
         this.position = new Vector2(640, 360);
@@ -64,14 +67,14 @@ public class Hero {
         this.hp = 100;
         this.strBuilder = new StringBuilder();
         this.hitArea = new Circle(position, 26.0f);
-
+        this.keysControl = new KeysControl(OptionsUtils.loadProperties(), keysControlPrefix);
 
         this.currentWeapon = new Weapon(
-                gc, this, "Laser", 0.2f, 1, 600.0f, 100,
+                gc, this, "Laser", 0.2f, 1, 600.0f, 320,
                 new Vector3[]{
                         new Vector3(28, 0, 0),
-                        new Vector3(28, 90, 90),
-                        new Vector3(28,-90, -90)
+                        new Vector3(28, 90, 20),
+                        new Vector3(28,-90, -20)
                 }
         );
 
@@ -86,6 +89,7 @@ public class Hero {
     public void renderGUI(SpriteBatch batch, BitmapFont font) {
         strBuilder.clear();
         strBuilder.append("SCORE: ").append(scoreView).append("\n");
+        strBuilder.append("MONEY: ").append(money).append("\n");
         strBuilder.append("HP: ").append(hp).append("\n");
         strBuilder.append("BULLETS: ").append(currentWeapon.getCurBullets()).append(" / ").append(currentWeapon.getMaxBullets()).append("\n");
         font.draw(batch, strBuilder, 20, 580);
@@ -95,21 +99,21 @@ public class Hero {
         fireTimer += dt;
         updateScore(dt);
 
-        if (Gdx.input.isKeyPressed(Input.Keys.P)) {
+        if (Gdx.input.isKeyPressed(keysControl.fire)) {
             tryToFire();
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+        if (Gdx.input.isKeyPressed(keysControl.left)) {
             angle += 180.0f * dt;
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+        if (Gdx.input.isKeyPressed(keysControl.right)) {
             angle -= 180.0f * dt;
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+        if (Gdx.input.isKeyPressed(keysControl.forward)) {
             velocity.x += (float) Math.cos(Math.toRadians(angle)) * enginePower * dt;
             velocity.y += (float) Math.sin(Math.toRadians(angle)) * enginePower * dt;
 
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+        if (Gdx.input.isKeyPressed(keysControl.backward)) {
             position.x -= (float) Math.cos(Math.toRadians(angle)) * enginePower * dt / 2.0f;
             position.y -= (float) Math.cos(Math.toRadians(angle)) * enginePower * dt / 2.0f;
 
@@ -196,6 +200,19 @@ public class Hero {
             if (scoreView > score) {
                 scoreView = score;
             }
+        }
+    }
+    public void consume(PowerUp p) {
+        switch (p.getType()) {
+            case MEDKIT:
+                hp += p.getPower();
+                break;
+            case AMMOS:
+                currentWeapon.addAmmos(p.getPower());
+                break;
+            case MONEY:
+                money += p.getPower();
+                break;
         }
     }
 }

@@ -39,6 +39,10 @@ public class Asteroid implements Poolable {
         return hitArea;
     }
 
+    public float getScale() {
+        return scale;
+    }
+
     public Vector2 getVelocity() {
         return velocity;
     }

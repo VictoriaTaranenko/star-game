@@ -16,7 +16,15 @@ public class ParticleController extends ObjectPool<Particle> {
                 float randomAngle = MathUtils.random(0.0f, 3.28f);
                 float randomSpeed = MathUtils.random(0.0f, 30.0f);
                 setup(x, y, (float) Math.cos(randomAngle) * randomSpeed, (float) Math.sin(randomAngle) * randomSpeed,
-                        5.0F,2.0f,2.0f,255,0,0,0,255,122,0,0);
+                        1.2f,2.0f,1.8f,1,0,0,1,1,0,0,0.2f);
+            }
+        }
+
+        public void takePowerUpEffect(float x, float y) {
+            for (int i = 0; i < 16; i++) {
+                float angle = 6.28f / 16.0f  * i;
+                setup(x, y, (float) Math.cos(angle) * 100.0f, (float) Math.sin(angle) * 100.0f,
+                        0.8f,3.0f,2.8f,0,1,0,1,1,1,0,0.4f);
             }
         }
     }
@@ -73,6 +81,7 @@ public class ParticleController extends ObjectPool<Particle> {
         for (int i = 0; i < activeList.size(); i++) {
             activeList.get(i).update(dt);
         }
+        checkPool();
     }
 
     public float lerp(float value1, float value2, float point) {
