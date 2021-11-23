@@ -59,6 +59,9 @@ public class GameController {
         particleController.update(dt);
         powerUpsController.update(dt);
         checkCollisions();
+        if(!hero.isAlive()) {
+            ScreenManager.getInstance().changeScreen(ScreenManager.ScreenType.GAMEOVER, hero);
+        }
     }
     public void checkCollisions() {
         for(int i = 0; i < asteroidController.getActiveList().size(); i++) {

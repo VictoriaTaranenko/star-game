@@ -57,6 +57,10 @@ public class Hero {
         return hitArea;
     }
 
+    public boolean isAlive() {
+        return hp > 0;
+    }
+
     public Hero(GameController gc, String keysControlPrefix) {
         this.gc = gc;
         this.texture = Assets.getInstance().getAtlas().findRegion("ship");
@@ -64,7 +68,7 @@ public class Hero {
         this.velocity = new Vector2(0, 0);
         this.angle = 0.0f;
         this.enginePower = 750.0f;
-        this.hp = 100;
+        this.hp = 5;
         this.strBuilder = new StringBuilder();
         this.hitArea = new Circle(position, 26.0f);
         this.keysControl = new KeysControl(OptionsUtils.loadProperties(), keysControlPrefix);
