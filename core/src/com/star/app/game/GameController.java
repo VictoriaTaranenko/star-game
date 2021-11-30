@@ -20,6 +20,17 @@ public class GameController {
     private Vector2 tmpVec;
     private Stage stage;
 
+    private float msgTimer;
+    private String msg;
+
+    public float getMsgTimer() {
+        return msgTimer;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
     public Stage getStage() {
         return stage;
     }
@@ -48,6 +59,10 @@ public class GameController {
         return hero;
     }
 
+    public int getLevel() {
+        return level;
+    }
+
     public GameController(SpriteBatch batch) {
         this.background = new Background(this);
         this.hero = new Hero(this, "PLAYER1");
@@ -60,13 +75,19 @@ public class GameController {
         this.stage.addActor(hero.getShop());
         this.level = 1;
         Gdx.input.setInputProcessor(stage);
+        generateTwoBigAsteroids();
+        this.msg = "Level 1";
+        this.msgTimer = 3.0f;
+
+    }
+    public void generateTwoBigAsteroids() {
         for(int i = 0; i < 2; i++) {
             this.asteroidController.setup(MathUtils.random(0, ScreenManager.SCREEN_WIDTH),MathUtils.random(0, ScreenManager.SCREEN_HEIGHT),
                     MathUtils.random(-150.0f, 150.0f), MathUtils.random(-150.0f, 150.0f), 1.0f);
         }
     }
-
     public void update(float dt) {
+        msgTimer -= dt;
         background.update(dt);
         hero.update(dt);
         asteroidController.update(dt);
@@ -76,6 +97,11 @@ public class GameController {
         checkCollisions();
         if(!hero.isAlive()) {
             ScreenManager.getInstance().changeScreen(ScreenManager.ScreenType.GAMEOVER, hero);
+        }
+        if(asteroidController.getActiveList().size() == 0) {
+            level++;
+            generateTwoBigAsteroids();
+
         }
         stage.act(dt);
     }

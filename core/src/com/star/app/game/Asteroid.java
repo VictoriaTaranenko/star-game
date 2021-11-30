@@ -86,7 +86,7 @@ public class Asteroid implements Poolable {
    public void activate(float x, float y, float vx, float vy, float scale) {
         this.position.set(x, y);
         this.velocity.set(vx, vy);
-        this.hpMax = (int)(10 * scale);
+        this.hpMax = (int)((10 + gc.getLevel() * 4) * scale);
         this.hp = this.hpMax;
         this.angle = MathUtils.random(0.0f,360.0f);
         this.hitArea.setPosition(position);

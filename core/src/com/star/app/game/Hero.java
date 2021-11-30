@@ -262,16 +262,17 @@ public class Hero {
     }
 
     public void updateScore(float dt) {
-        if (scoreView < score) {
+        if(scoreView != score) {
             float scoreSpeed = (score - scoreView) / 2.0f;
-            if (scoreSpeed < 2000.0f) {
-                scoreSpeed = 2000.0f;
+            if(Math.abs(scoreSpeed) < 2000.0f) {
+                scoreSpeed = Math.signum(scoreSpeed) * 2000.0f;
             }
             scoreView += scoreSpeed * dt;
-            if (scoreView > score) {
+            if(Math.abs(scoreView - score) < Math.abs(scoreSpeed * dt)) {
                 scoreView = score;
             }
         }
+
     }
     public void consume(PowerUp p) {
         switch (p.getType()) {
