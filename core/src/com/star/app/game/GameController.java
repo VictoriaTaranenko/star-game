@@ -1,10 +1,16 @@
 package com.star.app.game;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.star.app.screen.ScreenManager;
 
+import static java.lang.Math.*;
+
 public class GameController {
+    private int level;
     private Background background;
     private AsteroidController asteroidController;
     private BulletController bulletController;
@@ -12,6 +18,11 @@ public class GameController {
     private PowerUpsController powerUpsController;
     private Hero hero;
     private Vector2 tmpVec;
+    private Stage stage;
+
+    public Stage getStage() {
+        return stage;
+    }
 
     public AsteroidController getAsteroidController() {
         return asteroidController;
@@ -37,7 +48,7 @@ public class GameController {
         return hero;
     }
 
-    public GameController() {
+    public GameController(SpriteBatch batch) {
         this.background = new Background(this);
         this.hero = new Hero(this, "PLAYER1");
         this.asteroidController = new AsteroidController(this);
@@ -45,6 +56,10 @@ public class GameController {
         this.particleController = new ParticleController();
         this.powerUpsController = new PowerUpsController(this);
         this.tmpVec = new Vector2(0.0f, 0.0f);
+        this.stage = new Stage(ScreenManager.getInstance().getViewport(), batch);
+        this.stage.addActor(hero.getShop());
+        this.level = 1;
+        Gdx.input.setInputProcessor(stage);
         for(int i = 0; i < 2; i++) {
             this.asteroidController.setup(MathUtils.random(0, ScreenManager.SCREEN_WIDTH),MathUtils.random(0, ScreenManager.SCREEN_HEIGHT),
                     MathUtils.random(-150.0f, 150.0f), MathUtils.random(-150.0f, 150.0f), 1.0f);
@@ -62,6 +77,27 @@ public class GameController {
         if(!hero.isAlive()) {
             ScreenManager.getInstance().changeScreen(ScreenManager.ScreenType.GAMEOVER, hero);
         }
+        stage.act(dt);
+    }
+    public void hit(Hero h, Asteroid a) {
+        float v1 = h.getVelocity().len();
+        float v2 = a.getVelocity().len();
+
+        float m1 = 0.1f;
+        float m2 = a.getScale();
+
+        float th1 = h.getVelocity().angleRad();
+        float th2 = a.getVelocity().angleRad();
+
+        float phi1 = tmpVec.set(a.getPosition()).sub(h.getPosition()).angleRad();
+        float phi2 = tmpVec.set(h.getPosition()).sub(a.getPosition()).angleRad();
+
+        float v1xN = (float)(((v1 * cos(th1 - phi1) * (m1 - m2) + 2 * m2 * v2 * cos(th2 - phi1) / (m1 - m2) * cos(phi1) + v1 * sin(th1 - phi1) * cos(phi1 + PI / 2.0f))));
+        float v1yN = (float)(((v1 * cos(th1 - phi1) * (m1 - m2) + 2 * m2 * v2 * cos(th2 - phi1) / (m1 + m2) * sin(phi1) + v1 * sin(th1 - phi1) * sin(phi1 + PI / 2.0f))));
+
+        float v2xN = (float)(((v2 * cos(th2 - phi2) * (m2 - m1) + 2 * m1 * v1 * cos(th1 - phi2) / (m2 + m1) * cos(phi2) + v2 * sin(th2 - phi2) * cos(phi2 + PI / 2.0f))));
+        float v2yN = (float)(((v2 * cos(th2 - phi2) * (m2 - m1) + 2 * m1 * v1 * cos(th1 - phi2) / (m2 + m1) * sin(phi2) + v2 * sin(th2 - phi2) * sin(phi2 + PI / 2.0f))));
+
     }
     public void checkCollisions() {
         for(int i = 0; i < asteroidController.getActiveList().size(); i++) {
@@ -72,11 +108,11 @@ public class GameController {
                 tmpVec.set(hero.getPosition()).sub(a.getPosition()).nor();
                 hero.getPosition().mulAdd(tmpVec, halfOverlen);
                 a.getPosition().mulAdd(tmpVec, -halfOverlen);
-
-                float sumScl = hero.getHitArea().radius * 2 + a.getHitArea().radius;
-
-                hero.getVelocity().mulAdd(tmpVec, 400.0f * halfOverlen * a.getHitArea().radius / sumScl);
-                a.getVelocity().mulAdd(tmpVec, 400.0f * -halfOverlen * hero.getHitArea().radius / sumScl);
+                hit(hero, a);
+//                float sumScl = hero.getHitArea().radius * 2 + a.getHitArea().radius;
+//
+//                hero.getVelocity().mulAdd(tmpVec, 400.0f * halfOverlen * a.getHitArea().radius / sumScl);
+//                a.getVelocity().mulAdd(tmpVec, 400.0f * -halfOverlen * hero.getHitArea().radius / sumScl);
 
                 if(a.takeDamage(2)) {
                     hero.addScore(a.getHpMax() * 10);
@@ -116,7 +152,7 @@ public class GameController {
             PowerUp p = powerUpsController.getActiveList().get(i);
             if(hero.getHitArea().contains(p.getPosition())) {
                 hero.consume(p);
-                particleController.getEffectBuilder().takePowerUpEffect(p.getPosition().x, p.getPosition().y);
+                particleController.getEffectBuilder().takePowerUpEffect(p.getPosition().x, p.getPosition().y,p.getType().index);
                 p.deactivate();
             }
         }

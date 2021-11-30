@@ -16,12 +16,58 @@ import com.star.app.screen.utils.OptionsUtils;
 
 public class Hero {
 
+    public class Skill {
+       private int level;
+       private int maxLevel;
+       private String title;
+       private Runnable[] effects;
+       private int[] cost;
+
+
+        public int getLevel() {
+            return level;
+        }
+
+        public int getMaxLevel() {
+            return maxLevel;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public int getCurrentLevelCost() {
+            return cost[level - 1];
+        }
+
+        public Skill(String title, Runnable[] effects, int[] cost) {
+           this.level = 1;
+           this.title = title;
+           this.effects = effects;
+           this.cost = cost;
+           this.maxLevel = effects.length;
+           if(effects.length != cost.length) {
+               throw new RuntimeException("Unable to create skill tree");
+           }
+       }
+        public boolean isUpgradable() {
+            return level < effects.length + 1;
+        }
+
+       public void upgrade() {
+            effects[level - 1].run();
+            level++;
+        }
+
+    }
+    private Skill[] skills;
     private GameController gc;
     private TextureRegion texture;
     private KeysControl keysControl;
     private Vector2 position;
     private Vector2 velocity;
     private int hp;
+    private int hpMax;
     private float angle;
     private float enginePower;
     private float fireTimer;
@@ -30,14 +76,30 @@ public class Hero {
     private Circle hitArea;
     private Weapon currentWeapon;
     private int money;
-
     private StringBuilder strBuilder;
+    private Shop shop;
+
+    public Skill[] getSkills() {
+        return skills;
+    }
+
+    public Shop getShop() {
+        return shop;
+    }
+
+    public boolean isMoneyEnough(int amount) {
+        return money >= amount;
+    }
+    public void decreaseMoney(int amount) {
+        money -= amount;
+    }
 
     public float getAngle() {
         return angle;
     }
 
     public int getScore() {
+
         return score;
     }
 
@@ -68,11 +130,14 @@ public class Hero {
         this.velocity = new Vector2(0, 0);
         this.angle = 0.0f;
         this.enginePower = 750.0f;
-        this.hp = 5;
+        this.hpMax = 100;
+        this.hp = this.hpMax;
+        this.money = 1000;
         this.strBuilder = new StringBuilder();
         this.hitArea = new Circle(position, 26.0f);
         this.keysControl = new KeysControl(OptionsUtils.loadProperties(), keysControlPrefix);
-
+        this.createSkillsTable();
+        this.shop = new Shop(this);
         this.currentWeapon = new Weapon(
                 gc, this, "Laser", 0.2f, 1, 600.0f, 320,
                 new Vector3[]{
@@ -94,7 +159,7 @@ public class Hero {
         strBuilder.clear();
         strBuilder.append("SCORE: ").append(scoreView).append("\n");
         strBuilder.append("MONEY: ").append(money).append("\n");
-        strBuilder.append("HP: ").append(hp).append("\n");
+        strBuilder.append("HP: ").append(hp).append(" / ").append(hpMax).append("\n");
         strBuilder.append("BULLETS: ").append(currentWeapon.getCurBullets()).append(" / ").append(currentWeapon.getMaxBullets()).append("\n");
         font.draw(batch, strBuilder, 20, 580);
     }
@@ -122,7 +187,9 @@ public class Hero {
             position.y -= (float) Math.cos(Math.toRadians(angle)) * enginePower * dt / 2.0f;
 
         }
-
+        if(Gdx.input.isKeyJustPressed(Input.Keys.U)) {
+            shop.setVisible(true);
+        }
         position.mulAdd(velocity, dt);
         hitArea.setPosition(position);
         float stopKoef = 1.0f - 2.0f * dt;
@@ -210,6 +277,9 @@ public class Hero {
         switch (p.getType()) {
             case MEDKIT:
                 hp += p.getPower();
+                if(hp > hpMax) {
+                    hp = hpMax;
+                }
                 break;
             case AMMOS:
                 currentWeapon.addAmmos(p.getPower());
@@ -219,4 +289,81 @@ public class Hero {
                 break;
         }
     }
+
+    public void upgrade(int index) {
+        int level = this.skills[index].level;
+        this.skills[index].effects[level - 1].run();
+        this.skills[index].level++;
+        
+    }
+    public void createSkillsTable() {
+        this.skills = new Skill[2];
+        skills[0] = new Skill("HP",
+                new Runnable[]{
+                        () -> hpMax += 10,
+                        () -> hpMax += 20,
+                        () -> hpMax += 30,
+                        () -> hpMax += 40,
+                        () -> hpMax += 50,
+                        () -> hpMax += 50,
+
+                },
+                new int[] {
+                        10,
+                        20,
+                        30,
+                        50,
+                        100,
+                        500
+                }
+                );
+        skills[1] = new Skill("WX- 1",
+                new Runnable[]{
+                        () -> {
+                            this.currentWeapon = new Weapon(
+                                    gc, this, "Laser", 0.3f, 1, 600.0f, 320,
+                                    new Vector3[]{
+                                            new Vector3(24, 0, 0),
+                                            new Vector3(24, 90, 20),
+                                            new Vector3(24,-90, -20)
+                                    }
+                            );
+                        },
+                        () -> {
+                            this.currentWeapon = new Weapon(
+                                    gc, this, "Laser", 0.3f, 1, 600.0f, 320,
+                                    new Vector3[]{
+
+                                            new Vector3(24, 20, 0),
+                                            new Vector3(24, -20, 0),
+                                            new Vector3(24, 90, 20),
+                                            new Vector3(24,-90, -20)
+                                    }
+                            );
+                        },
+                        () -> {
+                            this.currentWeapon = new Weapon(
+                                    gc, this, "Laser", 0.05f, 2, 600.0f, 320,
+                                    new Vector3[]{
+
+                                            new Vector3(24, 20, 0),
+                                            new Vector3(24, 0, 0),
+                                            new Vector3(24, -20, 0),
+                                            new Vector3(24, 90, 20),
+                                            new Vector3(24,-90, -20)
+                                    }
+                            );
+                        }
+
+                },
+
+                new int[] {
+                       100,
+                        200,
+                        300
+                }
+        );
+
+    }
+
 }
