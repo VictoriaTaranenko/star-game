@@ -20,22 +20,25 @@ public class LoadingScreen extends AbstractScreen {
         this.texture = new Texture(pixmap);
         pixmap.dispose();
     }
+
     @Override
     public void show() {
 
     }
+
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(0,0,0,1);
+        Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        if(Assets.getInstance().getAssetManager().update()) {
+        if (Assets.getInstance().getAssetManager().update()) {
             Assets.getInstance().makeLinks();
             ScreenManager.getInstance().goToTarget();
         }
         batch.begin();
-        batch.draw(texture, 0,0,1000 * Assets.getInstance().getAssetManager().getProgress(), 20);
+        batch.draw(texture, 0, 0, 1000 * Assets.getInstance().getAssetManager().getProgress(), 20);
         batch.end();
     }
+
     @Override
     public void dispose() {
         texture.dispose();

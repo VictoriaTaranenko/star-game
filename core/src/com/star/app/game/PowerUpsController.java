@@ -22,21 +22,21 @@ public class PowerUpsController extends ObjectPool<PowerUp> {
     }
 
     public void render(SpriteBatch batch) {
-        for(int i = 0; i < activeList.size(); i++) {
+        for (int i = 0; i < activeList.size(); i++) {
             PowerUp p = activeList.get(i);
-            int frameIndex = (int)(p.getTime() / 0.1f) % textures[p.getType().index].length;
+            int frameIndex = (int) (p.getTime() / 0.1f) % textures[p.getType().index].length;
             batch.draw(textures[p.getType().index][frameIndex], p.getPosition().x - 30, p.getPosition().y - 30);
         }
     }
 
-    public void setup(float x, float y, float probability ) {
-        if(MathUtils.random() <= probability) {
-            getActiveElement().activate(PowerUp.Type.values()[MathUtils.random(0,2)],x, y,20);
+    public void setup(float x, float y, float probability) {
+        if (MathUtils.random() <= probability) {
+            getActiveElement().activate(PowerUp.Type.values()[MathUtils.random(0, 2)], x, y, 20);
         }
     }
 
     public void update(float dt) {
-        for(int i = 0; i < activeList.size(); i++) {
+        for (int i = 0; i < activeList.size(); i++) {
             activeList.get(i).update(dt);
         }
         checkPool();

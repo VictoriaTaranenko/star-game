@@ -3,6 +3,8 @@ package com.star.app.screen.utils;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.FileHandleResolver;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -35,23 +37,25 @@ public class Assets {
     }
 
     public void loadAssets(ScreenManager.ScreenType type) {
-        switch(type) {
+        switch (type) {
             case MENU:
-                assetManager.load("images/game.pack",TextureAtlas.class);
+                assetManager.load("images/game.pack", TextureAtlas.class);
                 createStandardFont(72);
                 createStandardFont(24);
                 break;
             case GAMEOVER:
-                assetManager.load("images/game.pack",TextureAtlas.class);
+                assetManager.load("images/game.pack", TextureAtlas.class);
                 createStandardFont(72);
                 createStandardFont(24);
                 break;
             case GAME:
-                assetManager.load("images/game.pack",TextureAtlas.class);
+                assetManager.load("images/game.pack", TextureAtlas.class);
+                assetManager.load("audio/Shoot.mp3", Sound.class);
+                assetManager.load("audio/Music.mp3", Music.class);
                 createStandardFont(32);
                 createStandardFont(24);
                 createStandardFont(72);
-               break;
+                break;
 
         }
     }
@@ -71,6 +75,7 @@ public class Assets {
         assetManager.load("fonts/font" + size + ".ttf", BitmapFont.class, fontLoaderParameter);
 
     }
+
     public void makeLinks() {
         textureAtlas = assetManager.get("images/game.pack", TextureAtlas.class);
     }

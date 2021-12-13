@@ -2,6 +2,8 @@ package com.star.app.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -14,14 +16,14 @@ import com.star.app.screen.ScreenManager;
 import com.star.app.screen.utils.Assets;
 import com.star.app.screen.utils.OptionsUtils;
 
-public class Hero {
+public class Hero extends Ship {
 
     public class Skill {
-       private int level;
-       private int maxLevel;
-       private String title;
-       private Runnable[] effects;
-       private int[] cost;
+        private int level;
+        private int maxLevel;
+        private String title;
+        private Runnable[] effects;
+        private int[] cost;
 
 
         public int getLevel() {
@@ -41,43 +43,42 @@ public class Hero {
         }
 
         public Skill(String title, Runnable[] effects, int[] cost) {
-           this.level = 1;
-           this.title = title;
-           this.effects = effects;
-           this.cost = cost;
-           this.maxLevel = effects.length;
-           if(effects.length != cost.length) {
-               throw new RuntimeException("Unable to create skill tree");
-           }
-       }
+            this.level = 1;
+            this.title = title;
+            this.effects = effects;
+            this.cost = cost;
+            this.maxLevel = effects.length;
+            if (effects.length != cost.length) {
+                throw new RuntimeException("Unable to create skill tree");
+            }
+        }
+
         public boolean isUpgradable() {
             return level < effects.length + 1;
         }
 
-       public void upgrade() {
+        public void upgrade() {
             effects[level - 1].run();
             level++;
         }
 
     }
+
+    private TextureRegion starTexture;
     private Skill[] skills;
-    private GameController gc;
-    private TextureRegion texture;
     private KeysControl keysControl;
-    private Vector2 position;
-    private Vector2 velocity;
-    private int hp;
-    private int hpMax;
-    private float angle;
-    private float enginePower;
-    private float fireTimer;
     private int score;
     private int scoreView;
-    private Circle hitArea;
-    private Weapon currentWeapon;
     private int money;
-    private StringBuilder strBuilder;
     private Shop shop;
+    private StringBuilder tmpStr;
+    private float objectCaptureRadius;
+
+
+    public float getObjectCaptureRadius() {
+        return objectCaptureRadius;
+    }
+
 
     public Skill[] getSkills() {
         return skills;
@@ -90,13 +91,11 @@ public class Hero {
     public boolean isMoneyEnough(int amount) {
         return money >= amount;
     }
+
     public void decreaseMoney(int amount) {
         money -= amount;
     }
 
-    public float getAngle() {
-        return angle;
-    }
 
     public int getScore() {
 
@@ -107,186 +106,145 @@ public class Hero {
         score += amount;
     }
 
-    public Vector2 getPosition() {
-        return position;
-    }
-
-    public Vector2 getVelocity() {
-        return velocity;
-    }
-
-    public Circle getHitArea() {
-        return hitArea;
-    }
-
     public boolean isAlive() {
-        return hp > 0;
+        return hp.isAboveZero();
     }
 
     public Hero(GameController gc, String keysControlPrefix) {
-        this.gc = gc;
+        super(gc, 100);
+        this.starTexture = Assets.getInstance().getAtlas().findRegion("star");
         this.texture = Assets.getInstance().getAtlas().findRegion("ship");
-        this.position = new Vector2(640, 360);
-        this.velocity = new Vector2(0, 0);
-        this.angle = 0.0f;
-        this.enginePower = 750.0f;
-        this.hpMax = 100;
-        this.hp = this.hpMax;
+        this.changePosition(640, 360);
+        this.enginePower = 1500.0f;
         this.money = 1000;
-        this.strBuilder = new StringBuilder();
-        this.hitArea = new Circle(position, 26.0f);
+        this.tmpStr = new StringBuilder();
         this.keysControl = new KeysControl(OptionsUtils.loadProperties(), keysControlPrefix);
         this.createSkillsTable();
         this.shop = new Shop(this);
+        this.objectCaptureRadius = 200.0f;
+        this.ownerType = OwnerType.PLAYER;
+
         this.currentWeapon = new Weapon(
-                gc, this, "Laser", 0.2f, 1, 600.0f, 320,
+                gc, this, "Laser", 0.2f, 1, 1, 320.0f, 600.0f, 320,
                 new Vector3[]{
-                        new Vector3(28, 0, 0),
-                        new Vector3(28, 90, 20),
-                        new Vector3(28,-90, -20)
+                        new Vector3(24, 90, 0),
+                        new Vector3(24, -90, 0)
                 }
         );
 
     }
 
-    public void render(SpriteBatch batch) {
-        batch.draw(texture, position.x - 32, position.y - 32, 32, 32, 64, 64, 1, 1, angle);
-
-    }
-//    boolean x = true;
-
     public void renderGUI(SpriteBatch batch, BitmapFont font) {
-        strBuilder.clear();
-        strBuilder.append("SCORE: ").append(scoreView).append("\n");
-        strBuilder.append("MONEY: ").append(money).append("\n");
-        strBuilder.append("HP: ").append(hp).append(" / ").append(hpMax).append("\n");
-        strBuilder.append("BULLETS: ").append(currentWeapon.getCurBullets()).append(" / ").append(currentWeapon.getMaxBullets()).append("\n");
-        font.draw(batch, strBuilder, 20, 580);
+        tmpStr.setLength(0);
+        tmpStr.append("SCORE: ").append(scoreView).append("\n");
+        tmpStr.append("MONEY: ").append(money).append("\n");
+        tmpStr.append("HP: ").append(hp.getCurrent()).append(" / ").append(hp.getMax()).append("\n");
+        tmpStr.append("BULLETS: ").append(currentWeapon.getCurBullets()).append(" / ").append(currentWeapon.getMaxBullets()).append("\n");
+        font.draw(batch, tmpStr, 20, 580);
+        int mapX = 800;
+        int mapY = 400;
+        batch.setColor(Color.GREEN);
+        batch.draw(starTexture, mapX - 12, mapY - 12, 24, 24);
+        {
+            float dst = position.dst(gc.getBot().getPosition());
+            if (dst < 3000.0f) {
+                tmpVector.set(gc.getBot().getPosition()).sub(this.position);
+                tmpVector.scl(160.0f / 3000.0f);
+                batch.setColor(Color.PURPLE);
+                batch.draw(starTexture, mapX + tmpVector.x - 8, mapY + tmpVector.y - 8, 16, 16);
+            }
+
+        }
+        batch.setColor(Color.RED);
+        for (int i = 0; i < gc.getAsteroidController().getActiveList().size(); i++) {
+            Asteroid a = gc.getAsteroidController().getActiveList().get(i);
+            float dst = position.dst(a.getPosition());
+            if (dst < 3000.0f) {
+                tmpVector.set(a.getPosition()).sub(this.position);
+                tmpVector.scl(160.0f / 3000.0f);
+                float pointScale = a.getScale() * 2.0f;
+                batch.draw(starTexture, mapX + tmpVector.x - 4, mapY + tmpVector.y - 4, 4, 4, 8, 8, pointScale, pointScale, 0.0f);
+            }
+        }
+        batch.setColor(Color.WHITE);
+        for (int i = 0; i < 120; i++) {
+            batch.draw(starTexture, mapX + 160.0f * MathUtils.cosDeg(360.0f / 120.0f * i) - 8, mapY + 160.0f * MathUtils.sinDeg(360.0f / 120.0f * i) - 8);
+        }
     }
 
     public void update(float dt) {
-        fireTimer += dt;
+        super.update(dt);
         updateScore(dt);
 
         if (Gdx.input.isKeyPressed(keysControl.fire)) {
-            tryToFire();
+            currentWeapon.tryToFire();
         }
         if (Gdx.input.isKeyPressed(keysControl.left)) {
-            angle += 180.0f * dt;
+            rotate(180.0f, dt);
         }
         if (Gdx.input.isKeyPressed(keysControl.right)) {
-            angle -= 180.0f * dt;
+            rotate(-180.0f, dt);
         }
         if (Gdx.input.isKeyPressed(keysControl.forward)) {
-            velocity.x += (float) Math.cos(Math.toRadians(angle)) * enginePower * dt;
-            velocity.y += (float) Math.sin(Math.toRadians(angle)) * enginePower * dt;
-
+            accelerate(dt);
         }
         if (Gdx.input.isKeyPressed(keysControl.backward)) {
-            position.x -= (float) Math.cos(Math.toRadians(angle)) * enginePower * dt / 2.0f;
-            position.y -= (float) Math.cos(Math.toRadians(angle)) * enginePower * dt / 2.0f;
-
+            brake(dt);
         }
-        if(Gdx.input.isKeyJustPressed(Input.Keys.U)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.U)) {
             shop.setVisible(true);
         }
-        position.mulAdd(velocity, dt);
-        hitArea.setPosition(position);
-        float stopKoef = 1.0f - 2.0f * dt;
-        if (stopKoef < 0.0f) {
-            stopKoef = 0.0f;
-        }
-        velocity.scl(stopKoef);
-            if (velocity.len() > 50.0f) {
-                float bx, by;
-                bx = position.x - 28.0f * (float) Math.cos(Math.toRadians(angle));
-                by = position.y - 28.0f * (float) Math.sin(Math.toRadians(angle));
-                for (int i = 0; i < 5; i++) {
-                    gc.getParticleController().setup(
-                            bx + MathUtils.random(-4, 4), by + MathUtils.random(-4, 4),
-                            velocity.x * -0.3f + MathUtils.random(-20, 20), velocity.y * -0.3f + MathUtils.random(-20, 20),
-                            0.5f,
-                            1.2f, 0.2f,
-                            1.0f, 0.5f, 0.0f, 1.0f,
-                            1.0f, 1.0f, 1.0f, 0.0f
-                    );
-                }
+
+        if (velocity.len() > 50.0f) {
+            float bx, by;
+            bx = position.x - 28.0f * (float) Math.cos(Math.toRadians(angle));
+            by = position.y - 28.0f * (float) Math.sin(Math.toRadians(angle));
+            for (int i = 0; i < 5; i++) {
+                gc.getParticleController().setup(
+                        bx + MathUtils.random(-4, 4), by + MathUtils.random(-4, 4),
+                        velocity.x * -0.3f + MathUtils.random(-20, 20), velocity.y * -0.3f + MathUtils.random(-20, 20),
+                        0.5f,
+                        1.2f, 0.2f,
+                        1.0f, 0.5f, 0.0f, 1.0f,
+                        1.0f, 1.0f, 1.0f, 0.0f
+                );
             }
-        checkSpaceBorders();
-    }
-
-    public void takeDamage(int amount) {
-        hp -= amount;
-    }
-
-    public void tryToFire() {
-        if (fireTimer > currentWeapon.getFirePeriod()) {
-            fireTimer = 0.0f;
-            currentWeapon.fire();
-//            float wx = position.x + (float) Math.cos(Math.toRadians(angle)) * 25;
-//            float wy = position.y + (float) Math.sin(Math.toRadians(angle)) * 25;
-//            gc.getBulletController().setup(wx, wy, (float) Math.cos(Math.toRadians(angle)) * 600 + velocity.x, (float) Math.sin(Math.toRadians(angle)) * 600 + velocity.y, angle);
-
-
-//                // стрельба из боковых пушек
-//                float wx = 0.0f, wy =
-//                x = !x;
-//                if(x) {
-//                 wx = position.x + (float)Math.cos(Math.toRadians(angle + 90)) * 28;
-//                 wy = position.y + (float)Math.sin(Math.toRadians(angle + 90)) * 28;
-//                gc.getBulletController().setup(wx, wy,(float)Math.cos(Math.toRadians(angle)) * 600 + velocity.x, (float)Math.sin(Math.toRadians(angle)) * 600 + velocity.y, angle);
-//               }else {
-//                 wx = position.x + (float)Math.cos(Math.toRadians(angle - 90)) * 28;
-//                 wy = position.y + (float)Math.sin(Math.toRadians(angle - 90)) * 28;
-//                gc.getBulletController().setup(wx, wy,(float)Math.cos(Math.toRadians(angle)) * 600 + velocity.x, (float)Math.sin(Math.toRadians(angle)) * 600 + velocity.y, angle);
         }
     }
 
-    public void checkSpaceBorders() {
-        if (position.x < hitArea.radius) {
-            position.x = hitArea.radius;
-            velocity.x *= -1;
-        }
-        if (position.x > ScreenManager.SCREEN_WIDTH - hitArea.radius) {
-            position.x = ScreenManager.SCREEN_WIDTH - hitArea.radius;
-            velocity.x *= -1;
-        }
-        if (position.y < hitArea.radius) {
-            position.y = hitArea.radius;
-            velocity.y *= -1;
-        }
-        if (position.y > ScreenManager.SCREEN_HEIGHT - hitArea.radius) {
-            position.y = ScreenManager.SCREEN_HEIGHT - hitArea.radius;
-            velocity.y *= -1;
-        }
-    }
 
     public void updateScore(float dt) {
-        if(scoreView != score) {
+        if (scoreView != score) {
             float scoreSpeed = (score - scoreView) / 2.0f;
-            if(Math.abs(scoreSpeed) < 2000.0f) {
+            if (Math.abs(scoreSpeed) < 2000.0f) {
                 scoreSpeed = Math.signum(scoreSpeed) * 2000.0f;
             }
             scoreView += scoreSpeed * dt;
-            if(Math.abs(scoreView - score) < Math.abs(scoreSpeed * dt)) {
+            if (Math.abs(scoreView - score) < Math.abs(scoreSpeed * dt)) {
                 scoreView = score;
             }
         }
 
     }
+
     public void consume(PowerUp p) {
         switch (p.getType()) {
             case MEDKIT:
-                hp += p.getPower();
-                if(hp > hpMax) {
-                    hp = hpMax;
-                }
+                tmpStr.setLength(0);
+                tmpStr.append("HP  + ").append(hp.increase(p.getPower()));
+                gc.getInfoController().setup(p.getPosition().x, p.getPosition().y, tmpStr, Color.GREEN);
                 break;
             case AMMOS:
                 currentWeapon.addAmmos(p.getPower());
+                tmpStr.setLength(0);
+                tmpStr.append("AMMOS  + ").append(p.getPower());
+                gc.getInfoController().setup(p.getPosition().x, p.getPosition().y, tmpStr, Color.ORANGE);
                 break;
             case MONEY:
                 money += p.getPower();
+                tmpStr.setLength(0);
+                tmpStr.append("MONEY  + ").append(p.getPower());
+                gc.getInfoController().setup(p.getPosition().x, p.getPosition().y, tmpStr, Color.YELLOW);
                 break;
         }
     }
@@ -295,21 +253,22 @@ public class Hero {
         int level = this.skills[index].level;
         this.skills[index].effects[level - 1].run();
         this.skills[index].level++;
-        
+
     }
+
     public void createSkillsTable() {
         this.skills = new Skill[2];
         skills[0] = new Skill("HP",
                 new Runnable[]{
-                        () -> hpMax += 10,
-                        () -> hpMax += 20,
-                        () -> hpMax += 30,
-                        () -> hpMax += 40,
-                        () -> hpMax += 50,
-                        () -> hpMax += 50,
+                        () -> hp.increaseMax(10),
+                        () -> hp.increaseMax(20),
+                        () -> hp.increaseMax(30),
+                        () -> hp.increaseMax(40),
+                        () -> hp.increaseMax(50),
+                        () -> hp.increaseMax(50)
 
                 },
-                new int[] {
+                new int[]{
                         10,
                         20,
                         30,
@@ -317,49 +276,49 @@ public class Hero {
                         100,
                         500
                 }
-                );
+        );
         skills[1] = new Skill("WX- 1",
                 new Runnable[]{
                         () -> {
                             this.currentWeapon = new Weapon(
-                                    gc, this, "Laser", 0.3f, 1, 600.0f, 320,
+                                    gc, this, "Laser", 0.3f, 1, 1, 400.0f, 600.0f, 320,
                                     new Vector3[]{
                                             new Vector3(24, 0, 0),
                                             new Vector3(24, 90, 20),
-                                            new Vector3(24,-90, -20)
+                                            new Vector3(24, -90, -20)
                                     }
                             );
                         },
                         () -> {
                             this.currentWeapon = new Weapon(
-                                    gc, this, "Laser", 0.3f, 1, 600.0f, 320,
+                                    gc, this, "Laser", 0.3f, 1, 2, 360.0f, 600.0f, 320,
                                     new Vector3[]{
 
                                             new Vector3(24, 20, 0),
                                             new Vector3(24, -20, 0),
                                             new Vector3(24, 90, 20),
-                                            new Vector3(24,-90, -20)
+                                            new Vector3(24, -90, -20)
                                     }
                             );
                         },
                         () -> {
                             this.currentWeapon = new Weapon(
-                                    gc, this, "Laser", 0.05f, 2, 600.0f, 320,
+                                    gc, this, "Laser", 0.05f, 2, 4, 240.0f, 600.0f, 320,
                                     new Vector3[]{
 
                                             new Vector3(24, 20, 0),
                                             new Vector3(24, 0, 0),
                                             new Vector3(24, -20, 0),
                                             new Vector3(24, 90, 20),
-                                            new Vector3(24,-90, -20)
+                                            new Vector3(24, -90, -20)
                                     }
                             );
                         }
 
                 },
 
-                new int[] {
-                       100,
+                new int[]{
+                        100,
                         200,
                         300
                 }

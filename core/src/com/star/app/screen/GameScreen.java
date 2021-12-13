@@ -32,7 +32,7 @@ public class GameScreen extends AbstractScreen {
 
     @Override
     public void dispose() {
-    gameController.dispose();
+        gameController.dispose();
     }
 
 }

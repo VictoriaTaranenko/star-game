@@ -17,9 +17,11 @@ public class Particle implements Poolable {
     public Vector2 getPosition() {
         return position;
     }
+
     public Vector2 getVelocity() {
         return velocity;
     }
+
     public float getR1() {
         return r1;
     }
@@ -67,6 +69,7 @@ public class Particle implements Poolable {
     public float getSize2() {
         return size2;
     }
+
     @Override
     public boolean isActive() {
         return active;
@@ -93,8 +96,8 @@ public class Particle implements Poolable {
     }
 
     public Particle() {
-        position = new Vector2(0,0);
-        velocity = new Vector2(0,0);
+        position = new Vector2(0, 0);
+        velocity = new Vector2(0, 0);
         size1 = 1.0f;
         size2 = 1.0f;
     }
@@ -102,10 +105,11 @@ public class Particle implements Poolable {
     public void deactivate() {
         active = false;
     }
+
     public void update(float dt) {
         time += dt;
         position.mulAdd(velocity, dt);
-        if(time > timeMax) {
+        if (time > timeMax) {
             deactivate();
         }
     }

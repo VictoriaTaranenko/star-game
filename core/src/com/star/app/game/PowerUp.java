@@ -15,6 +15,7 @@ public class PowerUp implements Poolable {
             this.index = index;
         }
     }
+
     private GameController gc;
     private Vector2 position;
     private Vector2 velocity;
@@ -62,7 +63,7 @@ public class PowerUp implements Poolable {
     public void activate(Type type, float x, float y, int power) {
         this.type = type;
         this.position.set(x, y);
-        this.velocity.set(MathUtils.random(-1.0f, 1.0f),MathUtils.random(-1.0f, 1.0f));
+        this.velocity.set(MathUtils.random(-1.0f, 1.0f), MathUtils.random(-1.0f, 1.0f));
         this.velocity.nor().scl(50.0f);
         this.active = true;
         this.power = power;

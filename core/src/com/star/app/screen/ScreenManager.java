@@ -37,15 +37,19 @@ public class ScreenManager {
     public static ScreenManager getInstance() {
         return ourInstance;
     }
+
     public Viewport getViewport() {
         return viewport;
     }
+
     public Camera getCamera() {
         return camera;
     }
+
     private ScreenManager() {
 
     }
+
     public void init(StarGame game, SpriteBatch batch) {
         this.game = game;
         this.batch = batch;
@@ -56,20 +60,23 @@ public class ScreenManager {
         this.gameOverScreen = new GameOverScreen(batch);
         this.loadingScreen = new LoadingScreen(batch);
     }
+
     public void resize(int width, int height) {
         viewport.update(width, height);
         viewport.apply();
     }
+
     public void resetCamera() {
-        camera.position.set(HALF_SCREEN_WIDTH, HALF_SCREEN_HEIGHT,0);
+        camera.position.set(HALF_SCREEN_WIDTH, HALF_SCREEN_HEIGHT, 0);
         camera.update();
         batch.setProjectionMatrix(camera.combined);
     }
+
     public void changeScreen(ScreenType type, Object... args) {
         Screen screen = game.getScreen();
         Assets.getInstance().clear();
         Gdx.input.setInputProcessor(null);
-        if(screen != null) {
+        if (screen != null) {
             screen.dispose();
         }
         resetCamera();
@@ -85,11 +92,12 @@ public class ScreenManager {
                 break;
             case GAMEOVER:
                 targetScreen = gameOverScreen;
-                gameOverScreen.setDefeatedHero((Hero)args[0]);
+                gameOverScreen.setDefeatedHero((Hero) args[0]);
                 Assets.getInstance().loadAssets(ScreenType.GAMEOVER);
                 break;
         }
     }
+
     public void goToTarget() {
         game.setScreen(targetScreen);
     }

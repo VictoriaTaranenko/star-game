@@ -15,7 +15,7 @@ import com.star.app.screen.utils.Assets;
 import com.star.app.screen.utils.OptionsUtils;
 
 
-public class MenuScreen extends  AbstractScreen {
+public class MenuScreen extends AbstractScreen {
     private Background background;
     private BitmapFont font72;
     private BitmapFont font24;
@@ -24,6 +24,7 @@ public class MenuScreen extends  AbstractScreen {
     public MenuScreen(SpriteBatch batch) {
         super(batch);
     }
+
     @Override
     public void show() {
         this.background = new Background(null);
@@ -63,7 +64,7 @@ public class MenuScreen extends  AbstractScreen {
         stage.addActor(btnExitGame);
         skin.dispose();
 
-        if(!OptionsUtils.isOptionsExists()) {
+        if (!OptionsUtils.isOptionsExists()) {
             OptionsUtils.createDefaultProperties();
         }
     }
@@ -72,14 +73,15 @@ public class MenuScreen extends  AbstractScreen {
         background.update(dt);
         stage.act(dt);
     }
+
     @Override
     public void render(float delta) {
         update(delta);
-        Gdx.gl.glClearColor(0,0,0,1);
+        Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
         background.render(batch);
-        font72.draw(batch, "Star Game", 0,500,1000,1,false);
+        font72.draw(batch, "Star Game", 0, 500, 1000, 1, false);
         batch.end();
         stage.draw();
     }

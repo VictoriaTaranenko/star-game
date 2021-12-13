@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.star.app.game.helpers.ObjectPool;
 import com.star.app.screen.utils.Assets;
 
@@ -11,38 +12,65 @@ import static com.badlogic.gdx.math.MathUtils.lerp;
 
 public class ParticleController extends ObjectPool<Particle> {
     public class EffectBuilder {
-        public void buildMonsterSplash(float x, float y) {
-            for (int i = 0; i < 15; i++) {
-                float randomAngle = MathUtils.random(0.0f, 3.28f);
-                float randomSpeed = MathUtils.random(0.0f, 30.0f);
-                setup(x, y, (float) Math.cos(randomAngle) * randomSpeed, (float) Math.sin(randomAngle) * randomSpeed,
-                        1.2f,2.0f,1.8f,1,0,0,1,1,0,0,0.2f);
-            }
-        }
 
         public void takePowerUpEffect(float x, float y, int index) {
             switch (index) {
                 case 0:
                     for (int i = 0; i < 16; i++) {
-                        float angle = 6.28f / 16.0f  * i;
+                        float angle = 6.28f / 16.0f * i;
                         setup(x, y, (float) Math.cos(angle) * 100.0f, (float) Math.sin(angle) * 100.0f,
-                                0.8f,3.0f,2.8f,1,0,0,1,1,0,0,0.4f);
+                                0.8f, 3.0f, 2.8f, 1, 0, 0, 1, 1, 0, 0, 0.4f);
                     }
                     break;
                 case 1:
                     for (int i = 0; i < 8; i++) {
-                        float angle = 6.28f / 8.0f  * i;
+                        float angle = 6.28f / 8.0f * i;
                         setup(x, y, (float) Math.cos(angle) * 100.0f, (float) Math.sin(angle) * 100.0f,
-                                0.8f,3.0f,2.8f,255,255,0,1,255,255,0,0.4f);
+                                0.8f, 3.0f, 2.8f, 255, 255, 0, 1, 255, 255, 0, 0.4f);
                     }
                     break;
                 case 2:
                     for (int i = 0; i < 24; i++) {
-                        float angle = 6.28f / 24.0f  * i;
+                        float angle = 6.28f / 24.0f * i;
                         setup(x, y, (float) Math.cos(angle) * 100.0f, (float) Math.sin(angle) * 100.0f,
-                                0.8f,3.0f,2.8f,1,0,0,1,1,0,0,0.4f);
+                                0.8f, 3.0f, 2.8f, 1, 0, 0, 1, 1, 0, 0, 0.4f);
                     }
                     break;
+            }
+
+        }
+
+        public void bulletCollideWithAsteroid(Vector2 bulletPosition, Vector2 bulletVelocity) {
+            setup(
+                    bulletPosition.x + MathUtils.random(-4, 4), bulletPosition.y + MathUtils.random(-4, 4),
+                    bulletVelocity.x * -0.5f + MathUtils.random(-30, 30), bulletVelocity.y * -0.5f + MathUtils.random(-30, 30),
+                    0.2f,
+                    2.2f, 1.7f,
+                    0.0f, 0.0f, 1.0f, 1.0f,
+                    1.0f, 1.0f, 1.0f, 0.0f
+            );
+        }
+
+        public void creteBulletTrace(String weaponTitle, Vector2 bulletPosition, Vector2 bulletVelocity) {
+            if (weaponTitle.equals("Laser")) {
+                setup(
+                        bulletPosition.x + MathUtils.random(-4, 4), bulletPosition.y + MathUtils.random(-4, 4),
+                        bulletVelocity.x * -0.3f + MathUtils.random(-20, 20), bulletVelocity.y * -0.3f + MathUtils.random(-20, 20),
+                        0.2f,
+                        1.4f, 1.0f,
+                        1.0f, 0.0f, 0.0f, 1.0f,
+                        1.0f, 1.0f, 0.0f, 0.0f
+                );
+            }
+            if (weaponTitle.equals("GreenLaser")) {
+                setup(
+                        bulletPosition.x + MathUtils.random(-4, 4), bulletPosition.y + MathUtils.random(-4, 4),
+                        bulletVelocity.x * -0.3f + MathUtils.random(-20, 20), bulletVelocity.y * -0.3f + MathUtils.random(-20, 20),
+                        0.3f,
+                        1.2f, 2.4f,
+                        0.2f, 1.0f, 0.2f, 1.0f,
+                        0.3f, 1.0f, 0.3f, 0.4f
+                );
             }
 
         }
@@ -80,7 +108,7 @@ public class ParticleController extends ObjectPool<Particle> {
             Particle o = activeList.get(i);
             float t = o.getTime() / o.getTimeMax();
             float scale = lerp(o.getSize1(), o.getSize2(), t);
-            if(MathUtils.random(0, 200) < 3) {
+            if (MathUtils.random(0, 200) < 3) {
                 scale *= 5.0f;
             }
             batch.setColor(lerp(o.getR1(), o.getR2(), t), lerp(o.getG1(), o.getG2(), t), lerp(o.getB1(), o.getB2(), t), lerp(o.getA1(), o.getA2(), t));

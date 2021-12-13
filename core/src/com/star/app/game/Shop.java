@@ -40,7 +40,7 @@ public class Shop extends Group {
             lamps[i] = new Image[hero.getSkills()[i].getMaxLevel()];
             for (int j = 0; j < lamps[i].length; j++) {
                 Image img = new Image(skin.getDrawable("star"));
-                    img.setColor(0, 1, 0, 1);
+                img.setColor(0, 1, 0, 1);
 
                 img.setPosition(110 + j * 20, 358 - i * 60);
 //            img.setScale(3.0f);
@@ -51,13 +51,13 @@ public class Shop extends Group {
 
 
         TextButton[] btnSkills = new TextButton[hero.getSkills().length];
-        for(int i = 0; i < btnSkills.length; i++) {
+        for (int i = 0; i < btnSkills.length; i++) {
             final int skillIndex = i;
-            final TextButton hpSkillBtn = new TextButton(hero.getSkills()[i].getTitle(),textButtonStyle);
+            final TextButton hpSkillBtn = new TextButton(hero.getSkills()[i].getTitle(), textButtonStyle);
             hpSkillBtn.addListener(new ChangeListener() {
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
-                    if(hero.getSkills()[skillIndex].isUpgradable()) {
+                    if (hero.getSkills()[skillIndex].isUpgradable()) {
                         int cost = hero.getSkills()[skillIndex].getCurrentLevelCost();
                         if (hero.isMoneyEnough(cost)) {
                             hero.decreaseMoney(cost);
@@ -67,7 +67,7 @@ public class Shop extends Group {
                     }
                 }
             });
-            hpSkillBtn.setPosition(20,300 - 60 * i);
+            hpSkillBtn.setPosition(20, 300 - 60 * i);
             this.addActor(hpSkillBtn);
         }
 
@@ -76,16 +76,16 @@ public class Shop extends Group {
         btnClose.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-            thisShop.setVisible(false);
+                thisShop.setVisible(false);
             }
         });
         btnClose.setTransform(true);
         btnClose.setScale(0.4f);
-        btnClose.setPosition(320,320);
+        btnClose.setPosition(320, 320);
 
 
         this.addActor(btnClose);
-        this.setPosition(20,90);
+        this.setPosition(20, 90);
         this.setVisible(false);
 
         skin.dispose();

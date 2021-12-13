@@ -15,11 +15,11 @@ public class AsteroidController extends ObjectPool<Asteroid> {
     }
 
     public AsteroidController(GameController gc) {
-    this.gc = gc;
+        this.gc = gc;
     }
 
     public void render(SpriteBatch batch) {
-        for(int i = 0; i < activeList.size(); i++) {
+        for (int i = 0; i < activeList.size(); i++) {
             Asteroid a = activeList.get(i);
             a.render(batch);
         }
@@ -30,7 +30,7 @@ public class AsteroidController extends ObjectPool<Asteroid> {
     }
 
     public void update(float dt) {
-        for(int i = 0; i < activeList.size(); i++) {
+        for (int i = 0; i < activeList.size(); i++) {
             activeList.get(i).update(dt);
         }
         checkPool();
